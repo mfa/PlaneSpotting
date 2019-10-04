@@ -1,5 +1,5 @@
 import argparse
-import os
+from pathlib import Path
 from planespotting import utils
 from planespotting.decoder import decode
 from planespotting import multilateration
@@ -28,10 +28,11 @@ def load_dump1090_file(file):
 
     dump1090_msg = []
 
+    filename = Path(file)
     json_data = utils.const_frame()
-    json_data["meta"]["file"] = file.split(os.sep)[-1]
+    json_data["meta"]["file"] = filename.name
     json_data["meta"]["mlat_mode"] = "avrmlat"
-    if os.path.exists(file) and utils.is_binary(file) is False:
+    if filename.exists() and utils.is_binary(file) is False:
         with open(file, 'r') as infile:
 
             id = 0
@@ -68,21 +69,20 @@ def main(filename, output, latitude, longitude, altitude, timestart, timeend, gs
     '''
 
 
-    path = "data" + os.sep + "adsb"
+    path = Path("data") / Path("adsb")
 
     if output is not None:
-        if output.find(os.sep, 0) != len(output) - 1:
-            path = output + os.sep + "data" + os.sep + "adsb"
-        else:
-            path = output + "data" + os.sep + "adsb"
+        output = Path(output)
+        path = output / "data" / "adsb"
 
 
-    if os.path.isdir(filename):
+    filename = Path(filename)
+    if filename.is_dir():
         print("loading in all files in folder:", filename)
 
         processing_files = utils.get_all_files(filename)
 
-    elif os.path.isfile(filename):
+    elif filename.is_file():
         print("loading in this file:", filename)
 
         processing_files = utils.get_one_file(filename)
@@ -146,7 +146,7 @@ def getArgs():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-f', '--from', action='store', default="input"+os.sep,
+    parser.add_argument('-f', '--from', action='store', default=Path("input"),
                         dest='file',
                         help='load in the file or folder')
 

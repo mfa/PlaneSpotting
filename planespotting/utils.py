@@ -1,4 +1,3 @@
-import os
 import json
 import math
 import numpy as np
@@ -8,10 +7,10 @@ from pathlib import Path
 def get_all_files(filename):
 
     processing_files = []
-    for root, dirs, files in os.walk(filename):
+    for root, dirs, files in filename.glob("*"):
         for file in files:
-            filepath = os.path.join(root, file)
-            if os.path.isfile(filepath):
+            filepath = root / file
+            if filepath.is_file():
                 #print("file", filepath)
                 processing_files.append(filepath)
 
@@ -183,29 +182,29 @@ def const_frame_data(): #This serves as a template for the json structure. Consi
 
 def create_folder(path):
 
-    if not os.path.exists(path):
-        os.makedirs(path)
+    if not path.exists():
+        path.mkdir(exist_ok=True)
 
 
 def store_file(path, file, data):
 
-    filename = file.split(os.sep)[-1].split(".")[0] + ".json"
+    filename = file.name + ".json"
 
     # create the folder
     create_folder(path)
 
-    with open(path + os.sep + filename, "w") as outfile:
+    with open(path / filename, "w") as outfile:
         json.dump(data, outfile, indent=4)
 
 
 def store_file_jsonGzip(path, file, data):
 
-    filename = file.split(os.sep)[-1].split(".")[0] + ".json.gz"
+    filename = Path(file.name + ".json.gz")
 
     # create the folder
     create_folder(path)
 
-    with gzip.GzipFile(path + os.sep + filename, 'w') as fout:
+    with gzip.GzipFile(path / filename, 'w') as fout:
         fout.write(json.dumps(data).encode('utf-8'))
 
 
